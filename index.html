@@ -2,9 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#030713">
 <title>Sous la ligne de flottaison</title>
-<meta name="description" content="Portrait culturel construit avec la théorie de la socialisation : une descente le long d'un iceberg, des pratiques visibles jusqu'aux valeurs.">
+<meta name="description" content="Portrait culturel construit avec la théorie de la socialisation : une descente le long d'un iceberg, des pratiques visibles jusqu'aux valeurs, des quatre piliers de la culture au relativisme.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -44,6 +45,9 @@
     *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
   }
   #sea { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  /* la barre d'URL mobile fait varier 100% en permanence : lvh est la hauteur
+     du viewport large, donc stable pendant le défilement. */
+  @supports (height: 100lvh) { #sea { height: 100lvh; } }
 
   /* ---------- reveal ---------- */
   .rv { opacity: 0; transform: translateY(30px); transition: opacity .85s cubic-bezier(.2,.7,.2,1), transform .85s cubic-bezier(.2,.7,.2,1); transition-delay: calc(var(--i, 0) * 60ms); }
@@ -242,7 +246,7 @@
   .residu p { font-size: 1.01rem; max-width: 66ch; }
 
   footer.layer { padding-block: 40px 130px; }
-  footer .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 28px; }
+  footer .sign { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: center; }
   footer ul { margin: 9px 0 0; padding-left: 16px; font-size: .85rem; color: var(--muted); display: grid; gap: 5px; }
 
   /* ---------- HUD ---------- */
@@ -281,23 +285,53 @@
   .filter button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
   /* ---------- sheet ---------- */
-  .veil { position: fixed; inset: 0; z-index: 20; background: rgba(2,6,18,.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .3s; }
-  .sheet { position: fixed; top: 12px; right: 12px; bottom: 12px; z-index: 21; width: min(520px, calc(100vw - 24px)); border-radius: 26px; background: rgba(9,19,42,.85); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 40px 90px -30px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.12) inset; backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%); color: #eaf1f8; transform: translateX(calc(100% + 24px)); transition: transform .5s cubic-bezier(.2,.8,.2,1); display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+  .veil { position: fixed; inset: 0; z-index: 20; background: rgba(2,6,18,.64); backdrop-filter: blur(7px) saturate(118%); -webkit-backdrop-filter: blur(7px) saturate(118%); opacity: 0; pointer-events: none; transition: opacity .34s; }
   body.open .veil { opacity: 1; pointer-events: auto; }
-  body.open .sheet { transform: none; }
-  .sheet header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 17px 21px 0; }
-  .sheet .x { appearance: none; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: inherit; width: 37px; height: 37px; border-radius: 50%; cursor: pointer; font-size: 17px; display: grid; place-items: center; flex: none; }
-  .sheet .x:hover { background: rgba(255,255,255,.14); }
-  .sheet .x:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-  .sheet .body { overflow-y: auto; padding: 13px 21px 26px; display: grid; gap: 17px; align-content: start; }
-  .sheet h3 { font-size: 1.95rem; line-height: 1.08; font-variation-settings: "opsz" 72; }
-  .sheet .hint { color: #a3b4cc; font-size: .99rem; margin-top: 6px; }
-  .sheet .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
-  .sheet .meta > div { padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12); }
-  .sheet .meta .v { font-family: var(--display); font-style: italic; font-size: 1.12rem; margin-top: 2px; }
-  .sheet .story { font-size: .99rem; display: grid; gap: 10px; }
-  .sheet .theory { padding: 15px 17px; border-radius: 15px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); font-size: .93rem; display: grid; gap: 6px; }
+
+  /* la fiche : une modale centree qui nait de la carte cliquee */
+  .stage { position: fixed; inset: 0; z-index: 21; display: grid; place-items: center; padding: 28px; pointer-events: none; }
+  body.guiding .stage { align-items: start; padding-top: 3vh; }
+  .sheet {
+    position: relative; pointer-events: none; visibility: hidden; opacity: 0;
+    width: min(1040px, 100%); max-height: min(664px, calc(100vh - 180px));
+    border-radius: 28px; color: #eaf1f8;
+    background: rgba(9,19,42,.9);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 70px 130px -45px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.13) inset;
+    backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+    display: grid; grid-template-rows: auto 1fr; overflow: hidden;
+    transition: opacity .2s ease, visibility .2s;
+  }
+  body.open .sheet { visibility: visible; opacity: 1; pointer-events: auto; }
+  .sheet::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, var(--a, #7fd0c4), transparent 64%); }
+
+  .sheet header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 21px 30px 0; }
+  .sheet .nav { display: flex; align-items: center; gap: 7px; }
+  .sheet .idx { font-family: var(--mono); font-size: .67rem; letter-spacing: .12em; color: #8fa2bd; min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
+  .sheet .nv, .sheet .x { appearance: none; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.05); color: inherit; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; font-size: 17px; line-height: 1; flex: none; font-family: var(--body); transition: background .2s, opacity .2s; }
+  .sheet .nv:hover:not(:disabled), .sheet .x:hover { background: rgba(255,255,255,.15); }
+  .sheet .nv:disabled { opacity: .28; cursor: default; }
+  .sheet .x { margin-left: 9px; }
+  .sheet .nv:focus-visible, .sheet .x:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+  .sheet .body { overflow-y: auto; padding: 14px 30px 30px; display: grid; gap: 20px; align-content: start; transition: opacity .16s ease; }
+  .sheet.swapping .body { opacity: 0; }
+  .sheet .main, .sheet .side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+  @media (min-width: 900px) {
+    .sheet .body { grid-template-columns: minmax(0,1.52fr) minmax(0,1fr); column-gap: 38px; row-gap: 0; padding: 18px 38px 34px; }
+    .sheet .side { border-left: 1px solid rgba(255,255,255,.1); padding-left: 32px; }
+  }
+  .sheet h3 { font-size: clamp(1.7rem, 2.4vw, 2.2rem); line-height: 1.06; font-variation-settings: "opsz" 72; }
+  .sheet .hint { color: #a3b4cc; font-size: 1.01rem; margin-top: 9px; }
+  .sheet .story { font-size: 1.02rem; line-height: 1.64; display: grid; gap: 13px; }
+  .sheet .meta { display: grid; gap: 8px; }
+  .sheet .meta > div { padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .sheet .meta .v { font-family: var(--display); font-style: italic; font-size: 1.04rem; }
+  .sheet .theory { padding: 15px 17px; border-radius: 15px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); font-size: .92rem; line-height: 1.55; display: grid; gap: 7px; }
+  .sheet:focus { outline: none; }
   .sheet .k { color: #a3b4cc; }
+  .sheet .hintbar { font-family: var(--mono); font-size: .63rem; letter-spacing: .1em; color: #7d8ea8; text-transform: uppercase; }
+  @media (max-width: 899px) { .sheet .hintbar { display: none; } }
 
   /* ---------- guide ---------- */
   .ring { position: fixed; z-index: 40; border-radius: 18px; pointer-events: none; opacity: 0; box-shadow: 0 0 0 9999px rgba(2,6,16,.82), 0 0 0 2px rgba(255,255,255,.45) inset; transition: opacity .35s, top .5s cubic-bezier(.2,.8,.2,1), left .5s cubic-bezier(.2,.8,.2,1), width .5s cubic-bezier(.2,.8,.2,1), height .5s cubic-bezier(.2,.8,.2,1); }
@@ -313,6 +347,115 @@
   .guide .btn { padding: 9px 18px; font-size: .88rem; }
   .guide .skip { appearance: none; background: none; border: 0; color: #8d9cb6; font: inherit; font-size: .85rem; cursor: pointer; text-decoration: underline; padding: 0; }
   .guide .skip:hover { color: #eaf1f8; }
+
+  /* ================= AJOUTS ================= */
+
+  .ideo { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 28px; }
+  @media (max-width: 760px) { .ideo { grid-template-columns: 1fr; } }
+  .ideo > div { padding: 22px; border-radius: 20px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); display: grid; gap: 9px; align-content: start; }
+  .ideo p { font-size: .93rem; }
+  .ideo .lim { font-size: .89rem; color: var(--muted); padding-top: 10px; margin-top: 2px; border-top: 1px dashed rgba(255,255,255,.16); }
+
+  /* ---------- pilier sur les cartes ---------- */
+  .pill.pilier { border-style: dashed; border-color: rgba(127,127,127,.5); }
+  body.by-pilier .card { opacity: .2; }
+  body.by-pilier .card.on { opacity: 1; border-color: #7fe3ff; box-shadow: 0 0 0 3px rgba(127,227,255,.18), 0 0 55px -8px rgba(127,227,255,.5); }
+  body.by-pilier .card.on .pill.pilier { border-style: solid; border-color: #7fe3ff; color: #bff0ff; }
+
+  /* ---------- bascule de dimension ---------- */
+  .filter .dim { position: relative; padding-right: 17px; margin-right: 3px; font-family: var(--mono); font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; opacity: .82; }
+  .filter .dim::after { content: ""; position: absolute; right: 0; top: 18%; bottom: 18%; width: 1px; background: rgba(255,255,255,.2); }
+  .filter .dim svg { width: 13px; height: 13px; flex: none; }
+  .filter .set { display: flex; gap: 5px; }
+  @media (max-width: 520px) { .filter .dim { padding-left: 13px; padding-right: 13px; } .filter .dim span { display: none; } }
+  .filter .set[hidden] { display: none; }
+
+  /* ================= MOBILE ================= */
+  @supports (height: 100svh) {
+    .hero { min-height: 100svh; }
+    .inter { min-height: 100svh; }
+  }
+  [id] { scroll-margin-top: 14px; }
+
+  .filter { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  footer.layer { padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); }
+
+  @media (max-width: 1000px) {
+    .hud { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  @media (max-width: 760px) {
+    .layer { padding-block: clamp(62px, 9vh, 96px); }
+    .inter { min-height: 74svh; }
+    .hero { min-height: 100svh; padding-block: 10vh 16vh; }
+    h1 { font-size: clamp(2.5rem, 12.5vw, 3.6rem); }
+    .lede { font-size: 1.02rem; margin-top: 18px; }
+    .howto { margin-top: 26px; gap: 12px; }
+    .howto .actions { order: -1; margin-top: 2px; }
+    .howto li { font-size: .93rem; }
+    .actions .btn { flex: 1 1 auto; text-align: center; padding: 13px 18px; min-height: 46px; }
+
+    /* le verre coute cher quand il est empile 27 fois : on l'allege */
+    .card { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,26,52,.62); padding: 18px 18px 15px; }
+    .light .card { background: rgba(255,255,255,.78); }
+    .panel { backdrop-filter: blur(8px) saturate(130%); -webkit-backdrop-filter: blur(8px) saturate(130%); background: rgba(7,16,38,.66); }
+    .light .panel { background: rgba(255,255,255,.62); }
+    .cards { gap: 11px; margin-top: 22px; }
+    .card:hover { transform: none; }
+
+    /* lisibilite du texte nu pose sur le canvas */
+    .layer:not(.light) .head h2, .layer:not(.light) .head .prose p { text-shadow: 0 2px 22px rgba(3,10,28,.75); }
+    .inter .cap p { text-shadow: 0 2px 18px rgba(3,10,28,.7); }
+
+    /* la fiche redevient une feuille qui monte du bas */
+    .stage { padding: 0; align-items: end; }
+    body.guiding .stage { align-items: end; padding-top: 0; }
+    .sheet {
+      width: 100%; max-height: 86svh;
+      border-radius: 24px 24px 0 0; border-bottom: 0;
+      grid-template-rows: auto auto 1fr;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      visibility: visible; opacity: 1;
+      transform: translateY(calc(100% + 16px));
+      transition: transform .42s cubic-bezier(.2,.8,.2,1);
+    }
+    body.open .sheet { transform: none; }
+    .sheet header { padding: 4px 18px 0; }
+    .sheet .body { padding: 10px 18px 30px; }
+    .sheet h3 { font-size: 1.6rem; }
+    body.open { overflow: hidden; }
+
+    .filter { left: 8px; right: 8px; transform: none; max-width: none; justify-content: flex-start; padding: 5px 6px; }
+    .filter button { padding: 10px 14px; min-height: 42px; }
+    .guide { width: calc(100vw - 20px); padding: 19px 20px; }
+    .guide .row { flex-wrap: wrap; row-gap: 12px; }
+    .roles, .gens { gap: 11px; }
+    blockquote { font-size: 1.1rem; }
+    .shared { padding: 15px 17px; }
+    .ev .t p { font-size: .89rem; }
+    .residu { background: rgba(10,22,46,.6); }
+    .layer:not(.light) .trio > div { background: rgba(10,22,46,.55); }
+    .light .residu { background: rgba(255,255,255,.6); }
+    .eyebrow { font-size: .64rem; letter-spacing: .12em; gap: 9px; }
+  }
+
+  /* poignee de la feuille : visible seulement sur telephone */
+  .sheet .grab { display: block; padding: 10px 0 4px; cursor: grab; touch-action: none; }
+  @media (min-width: 761px) { .sheet .grab { display: none; } }
+  .sheet .grab::before { content: ""; display: block; width: 44px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.3); margin: 0 auto; }
+  body.dragging .sheet { transition: none; }
+
+  @media (max-width: 380px) {
+    .filter button { padding: 10px 12px; font-size: .82rem; }
+    .trio > div { padding: 14px 15px; }
+  }
+
+  /* ecran tres court en paysage : on ne bloque pas la lecture */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero { min-height: auto; padding-block: 9vh 7vh; }
+    .inter { min-height: auto; padding-block: 16vh; }
+    .hud { display: none; }
+  }
 </style>
 <style>html{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -334,8 +477,9 @@
   <a href="#statuts"><span>Statuts</span><em>230 m</em><i></i></a>
   <a href="#frise"><span>Frise</span><em>340 m</em><i></i></a>
   <a href="#rencontre"><span>Rencontre</span><em>400 m</em><i></i></a>
-  <a href="#generations"><span>Générations</span><em>520 m</em><i></i></a>
-  <a href="#conclusion"><span>Conclusion</span><em>648 m</em><i></i></a>
+  <a href="#generations"><span>Générations</span><em>500 m</em><i></i></a>
+  <a href="#regard"><span>Regard</span><em>560 m</em><i></i></a>
+  <a href="#conclusion"><span>Conclusion</span><em>640 m</em><i></i></a>
 </nav>
 
 <!-- ============ SURFACE ============ -->
@@ -343,14 +487,14 @@
   <div class="wrap"><div class="content">
     <div class="eyebrow"><span>Portrait culturel</span><span>·</span><span>Communication interculturelle, ING2, CY Tech</span></div>
     <h1 style="margin-top:14px"><span class="w" style="--i:0"><span>Sous la ligne</span></span> <span class="w" style="--i:1"><span><em>de flottaison</em></span></span></h1>
-    <p class="lede fade" style="animation-delay:.75s">Je m'appelle Simon. Je viens de Bretagne, je fais du skiff et je suis apprenti en finance. C'est ce qu'on apprend de moi en une minute de conversation. Le reste demande de descendre : les règles que je suis sans me souvenir de les avoir apprises, les valeurs sur lesquelles je m'appuie pour choisir, et les gens qui me les ont transmises.</p>
+    <p class="lede fade" style="animation-delay:.75s">Je m'appelle Simon. Je viens de Bretagne, je fais du skiff et je suis apprenti en finance. C'est ce qu'on apprend de moi en une minute de conversation, et c'est à peu près tout ce qui dépasse. Le reste demande de descendre : les règles que je suis sans me souvenir de les avoir apprises, ce sur quoi je tranche quand elles ne disent rien, et les gens qui ont déposé tout cela sans jamais me l'expliquer.</p>
 
     <div class="howto fade" style="animation-delay:1s">
       <span class="k">Comment lire cette page</span>
       <ol>
         <li>Vous descendez le long d'un iceberg en faisant défiler la page. La profondeur et la lumière restante s'affichent en bas à gauche.</li>
-        <li>Chaque carte est un élément de ma culture. Un clic ouvre son détail : qui me l'a transmis, à quel moment de ma vie, et ce que la théorie en dit.</li>
-        <li>Le bandeau du bas filtre par agent de socialisation. Choisissez la famille, et toutes les cartes qu'elle a déposées s'allument.</li>
+        <li>Chaque carte est un morceau de moi. Un clic l'ouvre : deux souvenirs précis, qui me l'a donné, et une ligne pour dire où ça se range dans le modèle.</li>
+        <li>Le bandeau du bas filtre : choisissez « famille », et tout ce qu'elle a déposé en moi s'allume. Vingt-sept éléments en tout, et cinq personnes ou presque pour les avoir donnés.</li>
       </ol>
       <div class="actions">
         <button type="button" class="btn primary" id="start-guide">Suivre le guide</button>
@@ -360,27 +504,29 @@
   </div></div>
 </section>
 
-<section class="layer light" data-depth="-24" data-label="Surface" data-side="wide">
+<!-- ============ LA REGLE DU JEU ============ -->
+<section class="layer light" id="modele" data-depth="-24" data-label="Surface" data-side="wide">
   <div class="wrap"><div class="content">
     <div class="panel rv">
-      <span class="k">Le modèle utilisé</span>
-      <div class="prose">
-        <p>La socialisation est le processus par lequel un individu apprend et intériorise les éléments de la culture de son groupe, ce qui lui permet de former sa personnalité sociale et de s'adapter au groupe dans lequel il vit. Elle transmet des pratiques, des normes, des valeurs, des statuts et des rôles.</p>
-        <p>Elle se déroule en deux temps. La socialisation primaire couvre l'enfance et passe par la famille, l'école, les amis et les médias. La socialisation secondaire commence avec le travail et les groupes qu'on rejoint ensuite. Entre les deux, la sociologie distingue les continuités, qui prolongent l'habitus de l'enfance, et les ruptures, quand l'individu change de groupe d'appartenance.</p>
+      <span class="k">La règle du jeu, en deux phrases</span>
+      <div class="prose" style="max-width:68ch">
+        <p>La socialisation, c'est le processus par lequel on apprend et intériorise la culture de son groupe. Elle dépose des <b>pratiques</b>, des <b>normes</b>, des <b>valeurs</b>, des <b>statuts</b> et des <b>rôles</b> — dans l'enfance par la famille, l'école, les pairs et les médias, puis à l'âge adulte par le travail.</p>
+        <p>Voilà, c'est toute la théorie. Le reste, ce sont mes vingt-sept éléments et les cinq voix qui me les ont donnés.</p>
       </div>
       <div class="legend">
-        <span class="k" style="margin-bottom:4px">Les cinq agents, et leur couleur sur cette page</span>
-        <div class="legend-row" style="--c: var(--famille)"><i></i><span>Ma famille</span><span>primaire, puis secondaire</span></div>
-        <div class="legend-row" style="--c: var(--ecole)"><i></i><span>L'école, puis l'école d'ingénieur</span><span>primaire, puis secondaire</span></div>
-        <div class="legend-row" style="--c: var(--amis)"><i></i><span>Le club de voile et mes amis</span><span>primaire</span></div>
-        <div class="legend-row" style="--c: var(--medias)"><i></i><span>Les médias et internet</span><span>primaire</span></div>
+        <span class="k" style="margin-bottom:4px">Qui parle, et de quelle couleur sur cette page</span>
+        <div class="legend-row" style="--c: var(--famille)"><i></i><span>Ma mère, ma sœur, mon père à Noël</span><span>primaire</span></div>
+        <div class="legend-row" style="--c: var(--ecole)"><i></i><span>L'école, puis CY Tech</span><span>primaire, puis secondaire</span></div>
+        <div class="legend-row" style="--c: var(--amis)"><i></i><span>Le club de voile, et Sam</span><span>primaire</span></div>
+        <div class="legend-row" style="--c: var(--medias)"><i></i><span>Un écran, pendant le confinement</span><span>primaire</span></div>
         <div class="legend-row" style="--c: var(--travail)"><i></i><span>L'entreprise</span><span>secondaire</span></div>
       </div>
       <div class="trio">
-        <div><span class="k">0 mètre</span><p>Les pratiques. Ce qui se voit quand on passe une journée avec moi.</p></div>
-        <div><span class="k">30 mètres</span><p>Les normes. Des règles que personne n'a écrites et que je n'ai jamais discutées.</p></div>
-        <div><span class="k">120 mètres</span><p>Les valeurs. Ce sur quoi je tranche quand la règle ne dit rien.</p></div>
+        <div><span class="k">0 mètre</span><p>Les <b>pratiques</b>. Ce qui se voit quand on passe une journée avec moi.</p></div>
+        <div><span class="k">30 mètres</span><p>Les <b>normes</b>. Des règles que personne n'a écrites et que je n'ai jamais discutées.</p></div>
+        <div><span class="k">120 mètres</span><p>Les <b>valeurs</b>. Ce sur quoi je tranche quand la règle ne dit rien.</p></div>
       </div>
+      <p class="muted" style="font-size:.9rem;margin-top:18px">Un second tri existe, par les quatre piliers — faire, communiquer, penser, être. La flèche du bandeau bascule de l'un à l'autre.</p>
     </div>
   </div></div>
 </section>
@@ -413,7 +559,7 @@
       <div class="eyebrow"><b>30 m</b><span>Sous l'eau</span></div>
       <h2>Les règles que je n'ai jamais discutées</h2>
       <div class="rule"></div>
-      <div class="prose"><p>Aucune de ces règles n'est une loi. On les appelle des mœurs quand elles viennent de la morale du groupe, et des usages quand elles viennent de l'habitude. Six d'entre elles ont été posées avant mes dix-huit ans, à la maison et au club. Trois sont arrivées à l'entreprise.</p></div>
+      <div class="prose"><p>Aucune de ces règles n'est une loi. On les appelle des mœurs quand elles viennent de la morale du groupe, et des usages quand elles viennent de l'habitude. Sept d'entre elles étaient posées avant mes dix-huit ans, à la maison et au club. Deux seulement sont arrivées avec l'entreprise.</p></div>
     </div>
     <div class="cards" data-layer="norme"></div>
   </div></div>
@@ -455,7 +601,7 @@
       <div class="eyebrow"><b>230 m</b><span>Statuts et rôles</span></div>
       <h2>Ce que l'on attend de moi, selon l'endroit</h2>
       <div class="rule"></div>
-      <div class="prose"><p>Un statut est une position à laquelle sont attachés des droits et des devoirs. Un rôle est le comportement attendu de celui qui occupe cette position. J'en occupe six, et ils ne demandent pas la même chose.</p></div>
+      <div class="prose"><p>Selon la pièce où j'entre, on n'attend pas la même chose de moi. Le statut, c'est la place ; le rôle, ce qu'on attend de celui qui l'occupe. J'en tiens six, et un seul que j'ai choisi.</p></div>
     </div>
     <div class="roles">
       <div class="role rv" style="--c: var(--famille);--i:0"><span class="w">Famille</span><h3>Fils</h3><p>Être autonome tôt, ne pas ajouter de problème à une journée d'hôpital, appeler le dimanche.</p></div>
@@ -533,47 +679,91 @@
   </div></div>
 </section>
 
-<div class="inter" data-depth="470" data-label="Bioluminescence" data-side="right">
+<div class="inter" data-depth="460" data-label="Bioluminescence" data-side="right">
   <div class="cap rv">
-    <div class="big">−470 m</div>
+    <div class="big">−460 m</div>
     <h2>La seule lumière vient de ce qui vit</h2>
     <p>À cette profondeur, plus rien ne descend de la surface. Ce qui éclaire encore a été produit sur place, par des organismes qui se transmettent la capacité de le faire depuis très longtemps.</p>
   </div>
 </div>
 
 <!-- ============ GÉNÉRATIONS ============ -->
-<section class="layer" id="generations" data-depth="520" data-label="Générations" data-side="wide">
+<section class="layer" id="generations" data-depth="500" data-label="Générations" data-side="wide">
   <div class="wrap"><div class="content">
     <div class="rv head">
-      <div class="eyebrow"><b>520 m</b><span>Le fossé des générations</span></div>
-      <h2>Trois générations, lues avec Margaret Mead</h2>
+      <div class="eyebrow"><b>500 m</b><span>Le fossé des générations</span></div>
+      <h2>Ma famille tient sur trois étages</h2>
       <div class="rule"></div>
-      <div class="prose"><p>Dans <i>Le fossé des générations</i>, Mead sépare trois régimes de transmission. La culture postfigurative tourne vers l'héritage, la cofigurative vers le présent, la préfigurative vers le futur et le changement. Ma famille suit ce découpage, sauf sur un point.</p></div>
+      <div class="prose"><p>Des grands-parents qui enseignaient, des parents définis par leur métier, deux enfants qui ont appris leur sujet sur internet. Margaret Mead appelle cela trois régimes de transmission : l'héritage, le présent, le futur. Ma famille les remplit dans l'ordre, sauf moi, et à moitié.</p></div>
     </div>
     <div class="gens">
       <div class="gen rv" style="--i:0"><span class="k">Postfigurative</span><h3>Mes grands-parents</h3><span class="who">Professeur de physique et institutrice, à Chartres</span><p>Ils ont enseigné six ans dans une école française au Maroc, où mon père est né. Ils y ont vécu sans changer de culture, puisque c'est l'école française qu'ils emportaient avec eux. Chez eux, on transmet et on respecte ce qu'on a reçu.</p></div>
       <div class="gen rv" style="--i:1"><span class="k">Cofigurative</span><h3>Mes parents</h3><span class="who">Un ingénieur au Havre, une infirmière à Vannes</span><p>Séparés, chacun son métier et sa région. Leur repère est le présent : les horaires, les gardes, ce qu'il y a à faire cette semaine. Ils m'ont transmis des manières de faire plutôt que des principes énoncés.</p></div>
       <div class="gen rv" style="--i:2"><span class="k">Préfigurative, à moitié</span><h3>Ma sœur et moi</h3><span class="who">Étudiants, autodidactes sur nos sujets</span><p>J'ai appris les marchés seul, sur internet, sans adulte pour me montrer. Mead dirait que là-dessus la transmission s'est inversée. Mais sur la hiérarchie et le travail, je suis du côté de mes grands-parents, ce qui ne correspond pas à l'image qu'on donne de ma génération.</p></div>
     </div>
+    <div class="residu rv" style="margin-top:12px">
+      <span class="k">Là où mon cas dément la règle</span>
+      <p>On apprend que la socialisation diffère selon le genre. Chez nous, non : ma sœur s'est débrouillée seule au même âge que moi, pour la même raison, qui était l'horaire d'un hôpital. Le milieu social, lui, a bien fait son travail — c'est celui-là que je mesure aujourd'hui dans un open space.</p>
+    </div>
   </div></div>
 </section>
 
-<div class="inter" data-depth="634" data-label="L'épave" data-side="left">
+<!-- ============ LE REGARD ============ -->
+<section class="layer" id="regard" data-depth="560" data-label="Le regard" data-side="wide">
+  <div class="wrap"><div class="content">
+    <div class="rv head">
+      <div class="eyebrow"><b>560 m</b><span>Le regard</span></div>
+      <h2>Comprendre sans juger, et la limite</h2>
+      <div class="rule"></div>
+      <div class="prose"><p>Tout ce qui précède dit ce qu'on m'a déposé. Reste ce que j'en fais quand je tombe sur quelqu'un d'autre. Je n'ai pas une position mais deux, et elles ne servent pas aux mêmes moments.</p></div>
+    </div>
+
+    <div class="ideo">
+      <div class="rv" style="--i:0">
+        <span class="k">Relativisme — ma méthode</span>
+        <h3>Le jour où la remarque a cessé de me coûter</h3>
+        <p>En entreprise, les plaisanteries sur CY Tech sont quotidiennes. Pendant des mois je les ai prises pour moi. Puis je les ai regardées comme ce qu'elles sont : une convention du milieu financier, transmise à mes collègues exactement comme le club m'a transmis de rincer un bateau avant de parler de la course.</p>
+        <p>Suspendre mon jugement assez longtemps pour voir leur culture fonctionner : ça ne m'a rien coûté, et ça m'a rendu les semaines plus légères.</p>
+        <p class="lim"><b>Sa limite.</b> Si tout se vaut, la hiérarchie des écoles devient un usage local qu'on n'a plus le droit de contester. Méthode, donc, et pas morale.</p>
+      </div>
+      <div class="rv" style="--i:1">
+        <span class="k">Universalisme — mon point dur</span>
+        <h3>Ce que je refuse de relativiser</h3>
+        <p>Un concours passé à vingt ans ne dit pas la valeur d'une personne, et cela ne dépend pas du secteur où l'on travaille. C'est le seul endroit où je refuse de dire « c'est leur culture ».</p>
+        <p>C'est ce qui me permet de croire au mérite en sachant que les lignes de départ diffèrent : en régate, certains équipages avaient du matériel neuf tous les ans.</p>
+        <p class="lim"><b>Sa limite.</b> À imposer une seule mesure, on efface ceux qui ne l'ont pas écrite. La mienne vient d'un milieu précis, et je ne l'ai pas choisie non plus.</p>
+      </div>
+    </div>
+
+    <div class="panel rv" style="margin-top:12px">
+      <span class="k">Le paradoxe</span>
+      <h3 style="margin-top:8px">La culture globale m'a atteint sans me déplacer</h3>
+      <div class="prose" style="max-width:66ch">
+        <p>À quinze ans, confiné dans une maison du Morbihan, j'ai appris un métier mondial sur un écran, dans une langue que je parle mal, sans qu'aucun adulte autour de moi ne s'y intéresse. Aucune des cinq voix de cette page n'y était pour quoi que ce soit.</p>
+        <p>Et pourtant je ne bouge pas. Je ne parle qu'une langue, j'ai vu la Polynésie, Bali et l'Espagne, et je rentre à chaque fois sans regret. Je suis l'immobile qui travaille avec les mêmes outils qu'un analyste à Singapour, et dont les sources sont anglophones parce qu'un algorithme les a choisies — c'est l'agent de socialisation le plus efficace que j'aie eu, et le seul sans visage.</p>
+      </div>
+    </div>
+
+    <blockquote class="rv">Relativiste par méthode, pour comprendre. Universaliste sur un point. Et, dans les faits, assimilé en un mois : la chemise, le vouvoiement, le rire.<cite>Où je me situe</cite></blockquote>
+  </div></div>
+</section>
+
+<div class="inter" data-depth="615" data-label="L'épave" data-side="left">
   <div class="cap rv">
-    <div class="big">−634 m</div>
+    <div class="big">−615 m</div>
     <h2>La coque d'un skiff</h2>
     <p>Le bateau n'a pas coulé. C'est moi qui suis parti, et ce que j'ai laissé en Bretagne est resté exactement dans l'état où je l'ai laissé.</p>
   </div>
 </div>
 
 <!-- ============ CONCLUSION ============ -->
-<section class="layer" id="conclusion" data-depth="648" data-label="Le fond" data-side="wide">
+<section class="layer" id="conclusion" data-depth="640" data-label="Le fond" data-side="wide">
   <div class="wrap"><div class="content">
     <div class="rv head">
-      <div class="eyebrow"><b>648 m</b><span>Le fond</span></div>
-      <h2>Durkheim ou Dubar</h2>
+      <div class="eyebrow"><b>640 m</b><span>Le fond</span></div>
+      <h2>Le moule, et ce que j'en ai fait</h2>
       <div class="rule"></div>
-      <div class="prose"><p>Deux familles de théories s'opposent. Pour Durkheim et Bourdieu, la socialisation coule l'individu dans un moule et l'héritage fait le reste. Pour Piaget, Percheron et Dubar, c'est un processus actif où la trajectoire de l'individu compte autant que son contexte. Les deux lectures marchent sur mon cas, mais pas sur les mêmes éléments.</p></div>
+      <div class="prose"><p>La sociologie se dispute pour savoir si l'on est coulé dans un moule ou si l'on se construit soi-même. Sur mon cas, les deux ont raison, mais pas sur les mêmes lignes. Voici le partage, fait honnêtement.</p></div>
     </div>
     <div class="verdict">
       <div class="rv" style="--i:0">
@@ -604,47 +794,65 @@
   </div></div>
 </section>
 
-<footer class="layer" data-depth="660" data-label="Le fond" data-side="wide">
+<footer class="layer" data-depth="655" data-label="Le fond" data-side="wide">
   <div class="wrap"><div class="content">
-    <div class="cols">
-      <div><span class="k">Cadre théorique</span><ul>
-        <li>Denys Cuche, <i>La notion de culture dans les sciences sociales</i>, La Découverte, 2004</li>
-        <li>Émile Durkheim et Pierre Bourdieu, la socialisation comme héritage et comme habitus</li>
-        <li>Jean Piaget, Annick Percheron et Claude Dubar, la socialisation comme processus actif</li>
-        <li>Margaret Mead, <i>Le fossé des générations</i>, 1971</li>
-        <li>Edward T. Hall, la métaphore de l'iceberg</li>
-      </ul></div>
-      <div><span class="k">Ce que la page applique</span><ul>
-        <li>Pratiques, normes et valeurs, aux profondeurs 0, 30 et 120 mètres</li>
-        <li>Statuts et rôles, à 230 mètres</li>
-        <li>Agents, phases, continuités et ruptures, dans la frise</li>
-        <li>Accommodation, signalée sur les cartes concernées</li>
-        <li>Rencontre interculturelle, dans la comparaison des deux icebergs</li>
-      </ul></div>
-    </div>
+    <p class="sign">Simon · portrait culturel · Communication interculturelle, ING2 FISA-FISE, CY Tech</p>
   </div></div>
 </footer>
 
-<div class="filter" role="group" aria-label="Filtrer par agent de socialisation">
-  <button type="button" data-agent="all" aria-pressed="true">Tout</button>
-  <button type="button" data-agent="famille" aria-pressed="false" style="--c: var(--famille)"><i></i>Famille</button>
-  <button type="button" data-agent="ecole" aria-pressed="false" style="--c: var(--ecole)"><i></i>École</button>
-  <button type="button" data-agent="amis" aria-pressed="false" style="--c: var(--amis)"><i></i>Club et amis</button>
-  <button type="button" data-agent="medias" aria-pressed="false" style="--c: var(--medias)"><i></i>Médias</button>
-  <button type="button" data-agent="travail" aria-pressed="false" style="--c: var(--travail)"><i></i>Entreprise</button>
+<div class="filter" role="group" aria-label="Filtrer les éléments de culture">
+  <button type="button" class="dim" id="dim-switch" aria-label="Changer la dimension du filtre">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 6h18"/><path d="M7 22l-4-4 4-4"/><path d="M21 18H3"/></svg>
+    <span id="dim-label">Agents</span>
+  </button>
+  <div class="set" id="set-agent">
+    <button type="button" data-agent="all" aria-pressed="true">Tout</button>
+    <button type="button" data-agent="famille" aria-pressed="false" style="--c: var(--famille)"><i></i>Famille</button>
+    <button type="button" data-agent="ecole" aria-pressed="false" style="--c: var(--ecole)"><i></i>École</button>
+    <button type="button" data-agent="amis" aria-pressed="false" style="--c: var(--amis)"><i></i>Club et amis</button>
+    <button type="button" data-agent="medias" aria-pressed="false" style="--c: var(--medias)"><i></i>Médias</button>
+    <button type="button" data-agent="travail" aria-pressed="false" style="--c: var(--travail)"><i></i>Entreprise</button>
+  </div>
+  <div class="set" id="set-pilier" hidden>
+    <button type="button" data-pilier="all" aria-pressed="true">Tout</button>
+    <button type="button" data-pilier="faire" aria-pressed="false">Faire</button>
+    <button type="button" data-pilier="communiquer" aria-pressed="false">Communiquer</button>
+    <button type="button" data-pilier="penser" aria-pressed="false">Penser</button>
+    <button type="button" data-pilier="etre" aria-pressed="false">Être</button>
+  </div>
 </div>
 
 <div class="veil" id="veil"></div>
-<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
-  <header><span class="k" id="sheet-tag"></span><button type="button" class="x" id="sheet-close" aria-label="Fermer">×</button></header>
-  <div class="body">
-    <div><h3 id="sheet-title"></h3><p class="hint" id="sheet-hint"></p></div>
-    <div><span class="k">Transmis par</span><div class="chips" id="sheet-agents"></div></div>
-    <div class="meta"><div><span class="k">Phase</span><div class="v" id="sheet-phase"></div></div><div><span class="k">Trajectoire</span><div class="v" id="sheet-traj"></div></div></div>
-    <div class="story" id="sheet-story"></div>
-    <div class="theory"><span class="k">Lecture théorique</span><p id="sheet-theory"></p></div>
-  </div>
-</aside>
+<div class="stage" id="stage">
+  <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true" tabindex="-1">
+    <div class="grab" id="sheet-grab" aria-hidden="true"></div>
+    <header>
+      <span class="k" id="sheet-tag"></span>
+      <div class="nav">
+        <span class="hintbar" id="sheet-keyhint">← → pour circuler</span>
+        <button type="button" class="nv" id="sheet-prev" aria-label="Élément précédent">‹</button>
+        <span class="idx" id="sheet-idx"></span>
+        <button type="button" class="nv" id="sheet-next" aria-label="Élément suivant">›</button>
+        <button type="button" class="x" id="sheet-close" aria-label="Fermer">×</button>
+      </div>
+    </header>
+    <div class="body">
+      <div class="main">
+        <div><h3 id="sheet-title"></h3><p class="hint" id="sheet-hint"></p></div>
+        <div class="story" id="sheet-story"></div>
+      </div>
+      <div class="side">
+        <div><span class="k">Transmis par</span><div class="chips" id="sheet-agents"></div></div>
+        <div class="meta">
+          <div><span class="k">Pilier</span><span class="v" id="sheet-pilier"></span></div>
+          <div><span class="k">Phase</span><span class="v" id="sheet-phase"></span></div>
+          <div><span class="k">Trajectoire</span><span class="v" id="sheet-traj"></span></div>
+        </div>
+        <div class="theory"><span class="k">Où cela se range dans le modèle</span><p id="sheet-theory"></p></div>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <div class="ring" id="ring" aria-hidden="true"></div>
 <div class="guide" id="guide" role="dialog" aria-modal="true" aria-labelledby="guide-title">
@@ -671,199 +879,200 @@
   };
   const TRAJ = { continuite: { label: "Continuité", cls: "" }, rupture: { label: "Rupture", cls: "rupture" }, accommodation: { label: "Accommodation", cls: "accommodation" } };
   const LAYER = { pratique: "Pratique", norme: "Norme", valeur: "Valeur" };
+  const PILIERS = { faire: "Faire", communiquer: "Communiquer", penser: "Penser", etre: "Être" };
 
   const ITEMS = [
     /* ---------------- PRATIQUES ---------------- */
-    { layer: "pratique", title: "Le français, et rien d'autre", hint: "Une seule langue à la maison, un anglais scolaire.", agents: ["famille", "ecole"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "communiquer", title: "Le français, et rien d'autre", hint: "Une seule langue à la maison, un anglais scolaire.", agents: ["famille", "ecole"], phase: "Primaire", traj: "continuite",
       story: [
         "Personne n'a parlé autre chose que le français chez moi. Mes grands-parents paternels ont enseigné six ans au Maroc, dans une école française. Ils en sont revenus avec des photos, pas avec une langue.",
         "En déplacement, à Bali comme en Polynésie, je me débrouille en anglais et je rentre. Je n'ai jamais cherché à en apprendre une deuxième."
       ],
-      theory: "La langue est l'élément le plus visible de l'iceberg et l'un des premiers que transmet la socialisation primaire. Elle indique ici une limite : un environnement monolingue rend la rencontre avec une autre culture plus coûteuse, puisque tout doit passer par une langue tierce." },
+      theory: "Sommet de l'iceberg, déposé par la socialisation primaire — et déjà une limite : tout doit passer par une langue tierce." },
 
-    { layer: "pratique", title: "Le vélo", hint: "Mon moyen de transport, et un sport à part entière.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "faire", title: "Le vélo", hint: "Mon moyen de transport, et un sport à part entière.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
       story: [
         "À la campagne, le vélo servait à aller au club, au collège et chez les copains. Je n'ai pas arrêté en arrivant à Cergy. Je n'ai pas de voiture et je n'en cherche pas.",
         "L'été 2022, j'ai traversé l'Europe à vélo avec ma mère et ma sœur. Plusieurs semaines, des étapes longues, peu de discussions le soir. C'est le souvenir de famille le plus net que j'aie."
       ],
-      theory: "Une pratique reçue du milieu de vie plutôt que d'un discours. Bourdieu parle d'habitus pour ces dispositions incorporées tôt, qui continuent d'agir après un changement complet de contexte." },
+      theory: "Habitus : une disposition incorporée par le milieu et non par un discours, qui a survécu à un changement complet de contexte." },
 
-    { layer: "pratique", title: "Le skiff", hint: "Open Skiff en solitaire, puis 29er en double avec Sam.", agents: ["amis"], phase: "Primaire", traj: "rupture",
+    { layer: "pratique", pilier: "faire", title: "Le skiff", hint: "Open Skiff en solitaire, puis 29er en double avec Sam.", agents: ["amis"], phase: "Primaire", traj: "rupture",
       story: [
         "J'ai commencé vers neuf ans sur Open Skiff, la classe qui s'appelait encore Open Bic, dans un club du golfe du Morbihan. Je suis passé au 29er en 2017, un skiff en double avec trapèze et spinnaker asymétrique.",
         "Le 29er demande deux personnes qui décident vite et au même moment. Nous avons fini vice-champions de France en 2021. Depuis Cergy, je ne navigue plus qu'en rentrant, et c'est ce qui me manque le plus."
       ],
-      theory: "Le club a été mon principal groupe de pairs, un agent de socialisation primaire au même titre que la famille et l'école. En le quittant j'ai changé de groupe d'appartenance, mais ses normes sont restées." },
+      theory: "Le club a été mon groupe de pairs principal. En le quittant j'ai changé de groupe d'appartenance ; ses normes, elles, sont restées." },
 
-    { layer: "pratique", title: "La batterie", hint: "Cinq ans dans un garage, deux concours régionaux.", agents: ["amis", "famille"], phase: "Primaire", traj: "rupture",
+    { layer: "pratique", pilier: "faire", title: "La batterie", hint: "Cinq ans dans un garage, deux concours régionaux.", agents: ["amis", "famille"], phase: "Primaire", traj: "rupture",
       story: [
         "Un copain du club en jouait, j'ai voulu la même. Ma mère l'a installée dans le garage avec une règle : rien après vingt heures. J'ai joué seul pendant cinq ans.",
         "Je suis passé deux fois devant un jury régional, en solo. Je n'ai pas emporté l'instrument à Cergy et je n'ai pas repris depuis."
       ],
-      theory: "Une pratique venue des pairs et encadrée par une norme familiale explicite. Son abandon montre qu'un déménagement suffit à faire disparaître une pratique de dix ans quand le contexte matériel ne suit pas." },
+      theory: "Une pratique venue des pairs, encadrée par une norme familiale. Dix ans d'instrument disparaissent quand le contexte matériel ne suit plus." },
 
-    { layer: "pratique", title: "Les crêpes du dimanche", hint: "Le seul rituel fixe d'une famille de trois.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "faire", title: "Les crêpes du dimanche", hint: "Le seul rituel fixe d'une famille de trois.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Nous ne sommes pas une famille de grandes tablées. Ma mère travaille en horaires décalés et mon père est à Noël. Le dimanche soir, quand elle était là, c'était crêpes, avec ma sœur.",
         "Une galette-saucisse sur le parking d'une régate reste pour moi le goût le plus breton qui existe."
       ],
-      theory: "La nourriture occupe la partie émergée de l'iceberg, celle qui se partage le plus facilement. Ici elle renseigne aussi sur la structure familiale : un rituel à trois, pas à vingt." },
+      theory: "La nourriture est la partie la plus visible de l'iceberg. Ici elle dit aussi la structure de la famille : un rituel à trois, pas à vingt." },
 
-    { layer: "pratique", title: "Dire bonjour à tout le monde", hint: "Un réflexe de campagne que j'ai gardé en open space.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "communiquer", title: "Dire bonjour à tout le monde", hint: "Un réflexe de campagne que j'ai gardé en open space.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
       story: [
         "À la campagne on salue les gens qu'on croise, qu'on les connaisse ou non. J'ai continué en entreprise et je fais le tour des bureaux en arrivant.",
         "Un collègue m'a demandé si j'étais nouveau, parce que personne d'autre ne le fait. J'ai continué quand même."
       ],
-      theory: "On appelle usage une règle qui vient de l'habitude et de la tradition, par opposition à la loi. L'écart entre la campagne et l'open space montre qu'un usage vaut dans un groupe, pas partout." },
+      theory: "Un usage, c'est-à-dire une règle née de l'habitude. Il vaut dans un groupe et pas partout : la campagne l'a posé, l'open space l'ignore." },
 
-    { layer: "pratique", title: "L'ordinateur, pas la console", hint: "Peu de télévision, presque pas de jeux vidéo.", agents: ["medias", "famille"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "faire", title: "L'ordinateur, pas la console", hint: "Peu de télévision, presque pas de jeux vidéo.", agents: ["medias", "famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Enfant, je regardais peu la télévision et je jouais peu. Le sport prenait les week-ends et les vacances. L'ordinateur est arrivé avec le confinement, d'abord pour les marchés, ensuite pour le code.",
         "L'informatique est aujourd'hui mon activité principale en dehors du travail, mais comme outil plutôt que comme loisir."
       ],
-      theory: "Les médias sont un agent de socialisation à part entière. Chez moi ils n'ont pas transmis une culture de masse mais une compétence technique, tard et sans intermédiaire." },
+      theory: "Les médias sont un agent de socialisation à part entière. Chez moi ils ont transmis une compétence technique, tard et sans intermédiaire." },
 
-    { layer: "pratique", title: "Chemise ou sweat", hint: "Deux garde-robes pour deux statuts.", agents: ["travail", "ecole"], phase: "Secondaire", traj: "accommodation",
+    { layer: "pratique", pilier: "etre", title: "Chemise ou sweat", hint: "Deux garde-robes pour deux statuts.", agents: ["travail", "ecole"], phase: "Secondaire", traj: "accommodation",
       story: [
         "En finance, la chemise est implicite. Personne ne me l'a dit, j'ai regardé les autres le premier jour et j'ai fait pareil le lendemain.",
         "Sur le campus je reviens au sweat sans y penser. Le vêtement change avec le statut, pas avec le temps qu'il fait."
       ],
-      theory: "L'accommodation désigne la transformation du comportement pour satisfaire les attentes de la société. Le vêtement en est la forme la plus rapide et la moins coûteuse." },
+      theory: "Accommodation : transformer son comportement pour répondre aux attentes du milieu. Le vêtement en est la forme la plus rapide et la moins coûteuse." },
 
-    { layer: "pratique", title: "Noël à Chartres", hint: "Le seul rendez-vous annuel avec la famille de mon père.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "pratique", pilier: "etre", title: "Noël à Chartres", hint: "Le seul rendez-vous annuel avec la famille de mon père.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Mes grands-parents paternels vivent à Chartres, où mon père est revenu du Maroc à trois ans. Noël est le seul moment de l'année où je le vois.",
         "Le Maroc, c'est eux qui me l'ont raconté, pas lui. Il en est parti trop tôt pour en avoir gardé quoi que ce soit."
       ],
-      theory: "Un rituel, au sens de la partie immergée de l'iceberg. Il entretient une fois par an le lien avec un groupe d'appartenance secondaire, dont je ne tiens presque rien d'autre." },
+      theory: "Un rituel qui entretient, une fois par an, un groupe d'appartenance dont je ne tiens presque rien d'autre." },
 
     /* ---------------- NORMES ---------------- */
-    { layer: "norme", title: "Arriver en avance", hint: "Partout, sans exception.", agents: ["amis", "famille"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "faire", title: "Arriver en avance", hint: "Partout, sans exception.", agents: ["amis", "famille"], phase: "Primaire", traj: "continuite",
       story: [
         "En régate, le comité donne l'heure du départ et la course part sans les bateaux qui ne sont pas sur la ligne. Ma mère prenait ses gardes à l'heure, sans commentaire.",
         "Je suis en avance partout. Quand quelqu'un arrive en retard sans prévenir, je le remarque, alors que la plupart des gens autour de moi n'y font pas attention."
       ],
-      theory: "La ponctualité est l'exemple le plus courant de norme sociale. Chez moi elle n'a jamais été énoncée : elle a été transmise par répétition, dans deux contextes qui la sanctionnaient différemment." },
+      theory: "La norme n'a jamais été énoncée : elle a été transmise par répétition, dans deux contextes qui la sanctionnaient." },
 
-    { layer: "norme", title: "Répondre dans la minute", hint: "Y compris le soir, y compris pour des choses sans urgence.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "communiquer", title: "Répondre dans la minute", hint: "Y compris le soir, y compris pour des choses sans urgence.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Je réponds aux messages presque immédiatement, à toute heure. Ce n'est pas l'entreprise qui me l'a appris, c'est ma famille. Chez nous, être joignable fait partie de ce qu'on doit aux autres.",
         "Je donne ce que je voudrais recevoir. Quand j'écris à quelqu'un, j'attends une réponse, donc je réponds. C'est aussi ce qui me rend utile au travail, où l'on a fini par compter là-dessus."
       ],
-      theory: "Une norme transmise par la famille et réinvestie ensuite dans un contexte qu'elle n'avait pas prévu. Elle illustre un cas de continuité : la socialisation secondaire réutilise l'habitus forgé pendant l'enfance au lieu de le remplacer." },
+      theory: "Continuité : la socialisation secondaire réutilise l'habitus de l'enfance au lieu de le remplacer." },
 
-    { layer: "norme", title: "Accepter ce qu'on me confie", hint: "Je n'ai jamais refusé une tâche.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "faire", title: "Accepter ce qu'on me confie", hint: "Je n'ai jamais refusé une tâche.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
       story: [
         "Ma mère ne choisit ni ses patients ni ses horaires. J'ai grandi avec l'idée qu'on fait ce qu'il y a à faire, sans discuter la répartition.",
         "En alternance, cela m'a donné une réputation de fiabilité et une charge de travail supérieure à celle des autres apprentis. On dit de ma génération qu'elle négocie tout. Je ne négocie rien."
       ],
-      theory: "Une norme familiale qui recoupe exactement les attentes du milieu professionnel. Durkheim parle d'intégration de l'individu au corps social : ici, la conscience collective a pris toute la place, au point que le refus ne se présente pas à moi comme une option." },
+      theory: "Durkheim : la conscience collective prend la place de la conscience individuelle. Refuser ne se présente pas à moi comme une option." },
 
-    { layer: "norme", title: "Ne pas se plaindre", hint: "La retenue comme règle de maison.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "communiquer", title: "Ne pas se plaindre", hint: "La retenue comme règle de maison.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Quand l'adulte de la maison rentre d'une journée d'hôpital, une difficulté de collège ne pèse pas lourd. Je n'ai appris ni à me plaindre ni à demander de l'aide.",
         "C'est confortable pour les autres et coûteux pour moi. Je garde les choses jusqu'à ce qu'elles débordent, ce qui arrive rarement mais franchement."
       ],
-      theory: "On appelle mœurs les règles qui découlent de la morale sociale du groupe. Celle-ci ne s'énonce jamais et se fait respecter par la gêne plutôt que par la sanction." },
+      theory: "Des mœurs : une règle issue de la morale du groupe, qui se fait respecter par la gêne et non par la sanction." },
 
-    { layer: "norme", title: "Vouvoyer jusqu'à ce qu'on m'arrête", hint: "Tutoyer seulement quand on me le propose.", agents: ["travail"], phase: "Secondaire", traj: "accommodation",
+    { layer: "norme", pilier: "communiquer", title: "Vouvoyer jusqu'à ce qu'on m'arrête", hint: "Tutoyer seulement quand on me le propose.", agents: ["travail"], phase: "Secondaire", traj: "accommodation",
       story: [
         "Sur le campus tout le monde se tutoie, parfois même les enseignants. En entreprise, j'ai vouvoyé tout le monde pendant un mois, jusqu'à ce qu'un senior me dise d'arrêter.",
         "Depuis je vouvoie par défaut et j'attends le signal. Le passage de l'un à l'autre est la chose la plus codée que j'aie rencontrée au travail."
       ],
-      theory: "Une norme explicite du milieu, apprise à l'âge adulte par accommodation. Elle montre que la socialisation secondaire ajoute des couches de règles sans effacer celles d'avant, puisque je continue de tutoyer sur le campus." },
+      theory: "Norme apprise à l'âge adulte. La socialisation secondaire ajoute une couche sans effacer la précédente : je tutoie toujours sur le campus." },
 
-    { layer: "norme", title: "Rire des remarques sur mon école", hint: "En finance, les écoles se classent.", agents: ["travail"], phase: "Secondaire", traj: "accommodation",
+    { layer: "norme", pilier: "communiquer", title: "Rire des remarques sur mon école", hint: "En finance, les écoles se classent.", agents: ["travail"], phase: "Secondaire", traj: "accommodation",
       story: [
         "Beaucoup de collègues sortent de Polytechnique ou de Centrale. Les remarques sur CY Tech sont quotidiennes et présentées comme des plaisanteries. Derrière, il y a une hiérarchie que tout le monde connaît.",
         "J'ai appris à rire avec eux, parce que la seule autre option serait de m'isoler. Je n'ai pas appris à trouver le classement juste."
       ],
-      theory: "Le point de contact des deux icebergs : je partage la pratique sans partager la valeur qui la fonde. Les relations interculturelles posent les cultures comme équivalentes et non hiérarchisées, ce qui est précisément ce que cette convention refuse." },
+      theory: "Le point de contact des deux icebergs : je partage la pratique sans partager la valeur qui la fonde." },
 
-    { layer: "norme", title: "Me débrouiller seul", hint: "Repas, transports, devoirs, dès le collège.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "faire", title: "Me débrouiller seul", hint: "Repas, transports, devoirs, dès le collège.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Avec une mère en horaires d'hôpital, j'ai appris tôt à me faire à manger, à prendre le bus et à gérer mes devoirs sans que personne ne vérifie.",
         "Personne ne me l'a jamais présenté comme une règle. C'était l'organisation de la maison, et ma sœur a appris la même chose au même âge."
       ],
-      theory: "La socialisation varie selon le milieu social et la structure familiale. Une famille monoparentale avec des horaires décalés produit une norme d'autonomie plus précoce que la moyenne." },
+      theory: "La socialisation varie selon le milieu et la structure familiale. Une famille monoparentale aux horaires d'hôpital produit l'autonomie plus tôt." },
 
-    { layer: "norme", title: "Ranger avant de débriefer", hint: "Le matériel d'abord, le résultat ensuite.", agents: ["amis"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "faire", title: "Ranger avant de débriefer", hint: "Le matériel d'abord, le résultat ensuite.", agents: ["amis"], phase: "Primaire", traj: "continuite",
       story: [
         "Au club, un bateau mal rincé est une faute plus grave qu'une mauvaise place. On dessale, on rince, on plie les voiles, et seulement après on parle de la course.",
         "Je fais la même chose avec mon code : je nettoie avant de montrer, même quand personne ne le demande."
       ],
-      theory: "Une norme collective transmise par le groupe de pairs, puis transposée à un domaine qui n'a aucun rapport. Le transfert indique qu'elle a été intériorisée comme principe et pas seulement comme consigne." },
+      theory: "Transmise par le groupe de pairs, puis transposée à mon code. Le transfert prouve qu'elle est intériorisée comme principe, pas comme consigne." },
 
-    { layer: "norme", title: "Ne pas annoncer ses résultats", hint: "Je parle rarement du titre de vice-champion.", agents: ["famille", "ecole"], phase: "Primaire", traj: "continuite",
+    { layer: "norme", pilier: "communiquer", title: "Ne pas annoncer ses résultats", hint: "Je parle rarement du titre de vice-champion.", agents: ["famille", "ecole"], phase: "Primaire", traj: "continuite",
       story: [
         "Ma mère ne raconte pas ses journées, et je n'ai pas appris à raconter les miennes. Le résultat de 2021 n'apparaît presque jamais dans une conversation.",
         "En finance, c'est un handicap. Le secteur récompense ceux qui exposent leur travail, et je fais l'inverse par réflexe."
       ],
-      theory: "Une norme familiale qui entre en conflit avec celles du milieu professionnel. Cette tension entre assimilation et accommodation se règle par un équilibre instable plutôt que par un choix définitif." },
+      theory: "Une norme familiale qui contredit celles du milieu professionnel. La tension se règle par un équilibre instable, pas par un choix." },
 
     /* ---------------- VALEURS ---------------- */
-    { layer: "valeur", title: "Le travail", hint: "Valeur d'origine économique, transmise par l'exemple.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "penser", title: "Le travail", hint: "Valeur d'origine économique, transmise par l'exemple.", agents: ["famille", "travail"], phase: "Primaire", traj: "continuite",
       story: [
         "Une infirmière et un ingénieur, deux personnes définies par leur métier. Je n'ai jamais entendu de discours sur la valeur du travail chez moi. Je l'ai vue tous les jours.",
         "J'aime travailler, y compris quand rien ne m'y oblige. C'est le seul rythme que je connaisse."
       ],
-      theory: "Le travail fait partie des valeurs d'origine économique. C'est la plus stable des miennes, et celle qui relie le plus directement la socialisation primaire à la secondaire, sans aucune rupture entre les deux." },
+      theory: "Valeur d'origine économique, et la plus stable des miennes : aucune rupture entre la socialisation primaire et la secondaire." },
 
-    { layer: "valeur", title: "L'autonomie", hint: "Compter d'abord sur soi.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "etre", title: "L'autonomie", hint: "Compter d'abord sur soi.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
       story: [
         "Élevé par une seule personne souvent absente, puis formé sur un bateau où l'on est seul à bord : deux apprentissages de la même chose, à quelques années d'écart.",
         "Le revers, c'est que je demande rarement de l'aide. Je préfère chercher trois heures plutôt que poser une question de trois minutes."
       ],
-      theory: "Une valeur produite par la structure de la famille plus que par une intention éducative. C'est le type de cas que Durkheim décrirait comme une contrainte du milieu : je ne l'ai pas choisie, je l'ai subie assez tôt pour ne pas m'en apercevoir." },
+      theory: "Produite par la structure de la famille plus que par une intention éducative. Je l'ai subie assez tôt pour ne pas m'en apercevoir." },
 
-    { layer: "valeur", title: "La réciprocité", hint: "Donner ce que je voudrais recevoir.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "penser", title: "La réciprocité", hint: "Donner ce que je voudrais recevoir.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Être là pour les autres quand ils en ont besoin, c'est la règle la plus claire de ma famille. Je l'applique à ma manière, en restant joignable et en répondant tout de suite.",
         "Je n'attends rien en retour de façon explicite, mais je traite les gens comme je voudrais qu'on me traite. C'est le principe qui organise le plus de mes comportements quotidiens."
       ],
-      theory: "Une valeur est un principe qui oriente l'action. Celui-ci est le seul que je puisse formuler seul, sans le déduire de mes actes, ce qui indique qu'il a été énoncé à la maison et pas seulement montré." },
+      theory: "La seule de mes valeurs que je sache formuler sans la déduire de mes actes : elle a été énoncée à la maison, pas seulement montrée." },
 
-    { layer: "valeur", title: "La transmission", hint: "Tutorat, soutien aux partiels, hackathons.", agents: ["famille", "ecole"], phase: "Secondaire", traj: "continuite",
+    { layer: "valeur", pilier: "penser", title: "La transmission", hint: "Tutorat, soutien aux partiels, hackathons.", agents: ["famille", "ecole"], phase: "Secondaire", traj: "continuite",
       story: [
         "Mes grands-parents enseignaient, ma mère soigne. J'ai monté des groupes de tutorat sur le campus et j'aide pendant les périodes de partiels.",
         "Dans un secteur où l'on est censé travailler pour la rémunération, c'est l'activité que je fais avec le plus de constance."
       ],
-      theory: "Une valeur héritée d'une génération que je n'ai pas vue travailler, puis réactivée par choix à l'école d'ingénieur. Dubar dirait que la trajectoire subjective compte autant que le contexte, et c'est la carte qui lui donne le plus raison." },
+      theory: "Héritée d'une génération que je n'ai pas vue travailler, puis réactivée par choix. Dubar : la trajectoire compte autant que le contexte." },
 
-    { layer: "valeur", title: "La fidélité à peu de gens", hint: "Un seul ami de Bretagne, depuis dix ans.", agents: ["amis"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "etre", title: "La fidélité à peu de gens", hint: "Un seul ami de Bretagne, depuis dix ans.", agents: ["amis"], phase: "Primaire", traj: "continuite",
       story: [
         "Je parle facilement à tout le monde et j'oublie vite les gens que je croise. Sam est l'exception : dix ans, des centaines d'heures sur le même bateau, et il ne vient pas de ma classe.",
         "Je préfère un lien profond à vingt liens légers. Cela rend l'entrée dans un nouveau groupe difficile, et cela explique en partie pourquoi tous mes amis sont français."
       ],
-      theory: "La sociabilité et le réseau sont eux aussi des produits de la socialisation. Le mien est étroit et ancien, ce qui limite mécaniquement les occasions de rencontre interculturelle." },
+      theory: "La sociabilité est elle aussi un produit de la socialisation. Un réseau étroit et ancien limite mécaniquement les occasions de rencontre." },
 
-    { layer: "valeur", title: "Le mérite", hint: "Le classement dit ce qui s'est passé sur l'eau.", agents: ["amis", "ecole", "travail"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "penser", title: "Le mérite", hint: "Le classement dit ce qui s'est passé sur l'eau.", agents: ["amis", "ecole", "travail"], phase: "Primaire", traj: "continuite",
       story: [
         "En régate, on finit à la place qu'on a gagnée pendant la course, et le résultat s'explique par les manœuvres, pas par autre chose.",
         "J'y ai aussi vu que les départs ne sont pas égaux. Certains équipages avaient du matériel neuf tous les ans. Je crois au mérite en sachant que la ligne de départ n'est pas la même pour tout le monde."
       ],
-      theory: "Une valeur d'origine à la fois politique et économique. Je la partage en surface avec mes collègues, mais nous n'y mettons pas le même contenu : pour moi elle se rejoue à chaque dossier, pour eux elle a été établie une fois par un concours." },
+      theory: "Valeur d'origine à la fois politique et économique, partagée en surface avec mes collègues — et remplie d'un tout autre contenu." },
 
-    { layer: "valeur", title: "La discrétion", hint: "Prendre peu de place.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "etre", title: "La discrétion", hint: "Prendre peu de place.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Petite famille, maison à la campagne, une mère qui ne raconte pas ses journées. J'ai appris à ne pas occuper l'espace.",
         "Depuis quelque temps, parler devant un groupe me coûte plus qu'avant. Ce qui était une habitude est devenu une gêne réelle."
       ],
-      theory: "Une valeur qui produit directement plusieurs de mes normes, dont la retenue et le silence sur les résultats. Elle montre l'emboîtement du modèle : les valeurs se concrétisent en normes, qui se traduisent en conduites." },
+      theory: "L'emboîtement du modèle en une carte : une valeur produit des normes, qui produisent des conduites." },
 
-    { layer: "valeur", title: "La Bretagne", hint: "Je m'en réclame, et je n'aime pas partir.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "etre", title: "La Bretagne", hint: "Je m'en réclame, et je n'aime pas partir.", agents: ["famille", "amis"], phase: "Primaire", traj: "continuite",
       story: [
         "Né en Vendée, passé par la Normandie, je me dis breton parce que tous mes souvenirs sont là. J'ai vu la Polynésie, Bali et l'Espagne, et je rentre à chaque fois sans regret.",
         "Ne pas aimer voyager est inhabituel à mon âge et je ne cherche pas à m'en excuser."
       ],
-      theory: "L'identité culturelle ressentie ne coïncide pas avec le lieu de naissance : elle se forme là où la socialisation primaire a eu lieu. C'est la distinction entre l'identité prescrite, celle qu'on m'attribuerait sur mon état civil, et l'identité vécue." },
+      theory: "L'identité vécue ne coïncide pas avec l'identité prescrite : elle se forme là où la socialisation primaire a eu lieu, pas là où l'on est né." },
 
-    { layer: "valeur", title: "Sans religion", hint: "Une case du modèle qui reste vide.", agents: ["famille"], phase: "Primaire", traj: "continuite",
+    { layer: "valeur", pilier: "penser", title: "Sans religion", hint: "Une case du modèle qui reste vide.", agents: ["famille"], phase: "Primaire", traj: "continuite",
       story: [
         "Personne ne pratique dans ma famille et le sujet n'est jamais venu à table. Il ne s'agit pas d'un rejet mais d'une absence complète.",
         "Ma morale vient d'ailleurs : du travail, du club et du métier de ma mère."
       ],
-      theory: "Les valeurs ont trois origines : religieuse, politique et économique. Chez moi les deux dernières ont occupé toute la place. Une case vide est un trait culturel à part entière, pas un manque." },
+      theory: "Des trois origines des valeurs — religieuse, politique, économique — les deux dernières ont tout occupé. Une case vide est un trait culturel." },
   ];
 
   /* ---------- cards ---------- */
@@ -873,14 +1082,14 @@
       if (it.layer !== grid.dataset.layer) return;
       const t = TRAJ[it.traj];
       const b = document.createElement("button");
-      b.type = "button"; b.className = "card rv"; b.dataset.agents = it.agents.join(" ");
+      b.type = "button"; b.className = "card rv"; b.dataset.agents = it.agents.join(" "); b.dataset.pilier = it.pilier;
       b.style.setProperty("--i", i++);
       b.style.setProperty("--a", AGENTS[it.agents[0]].c);
       b.innerHTML = '<h3>' + it.title + '</h3><p class="hint">' + it.hint + '</p>' +
         '<span class="foot"><span class="dots">' +
         it.agents.map(a => '<i style="--c:' + AGENTS[a].c + '" title="' + AGENTS[a].name + '"></i>').join("") +
-        '</span><span class="pill">' + it.phase + '</span><span class="pill ' + t.cls + '">' + t.label + '</span></span>';
-      b.addEventListener("click", () => openSheet(idx));
+        '</span><span class="pill pilier">' + PILIERS[it.pilier] + '</span><span class="pill">' + it.phase + '</span><span class="pill ' + t.cls + '">' + t.label + '</span></span>';
+      b.addEventListener("click", () => openSheet(idx, b));
       grid.appendChild(b);
     });
   });
@@ -898,42 +1107,154 @@
   /* ---------- sheet ---------- */
   const sheet = document.getElementById("sheet"), veil = document.getElementById("veil");
   let lastFocus = null;
-  function openSheet(idx) {
+  const sPrev = document.getElementById("sheet-prev"), sNext = document.getElementById("sheet-next"),
+        sIdx = document.getElementById("sheet-idx");
+  let curIdx = -1;
+
+  function fill(idx) {
     const it = ITEMS[idx], t = TRAJ[it.traj];
+    curIdx = idx;
     document.getElementById("sheet-tag").textContent = LAYER[it.layer];
     document.getElementById("sheet-title").textContent = it.title;
     document.getElementById("sheet-hint").textContent = it.hint;
     document.getElementById("sheet-agents").innerHTML = it.agents.map(a => '<span class="chip" style="--c:' + AGENTS[a].c + '"><i></i>' + AGENTS[a].name + '</span>').join("");
+    document.getElementById("sheet-pilier").textContent = PILIERS[it.pilier];
     document.getElementById("sheet-phase").textContent = it.phase;
     document.getElementById("sheet-traj").textContent = t.label;
     document.getElementById("sheet-story").innerHTML = it.story.map(p => "<p>" + p + "</p>").join("");
     document.getElementById("sheet-theory").textContent = it.theory;
+    sheet.style.setProperty("--a", AGENTS[it.agents[0]].c);
+    sIdx.textContent = String(idx + 1).padStart(2, "0") + " / " + ITEMS.length;
+    sPrev.disabled = idx === 0;
+    sNext.disabled = idx === ITEMS.length - 1;
+    sheet.querySelector(".body").scrollTop = 0;
+  }
+
+  /* la modale part de la carte cliquee et grandit jusqu'a sa place */
+  function grow(from) {
+    if (reduce || isPhone() || !from || !sheet.animate) return;
+    const a = from.getBoundingClientRect(), b = sheet.getBoundingClientRect();
+    if (!b.width || !b.height) return;
+    const k = Math.max(.12, Math.min(1, a.width / b.width));
+    const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+    const dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+    sheet.animate(
+      [{ transform: "translate(" + dx + "px," + dy + "px) scale(" + k + ")", opacity: 0 },
+       { transform: "none", opacity: 1 }],
+      { duration: 460, easing: "cubic-bezier(.22,.9,.24,1)" }
+    );
+    sheet.querySelector(".body").animate(
+      [{ opacity: 0 }, { opacity: 0, offset: .35 }, { opacity: 1 }],
+      { duration: 460, easing: "ease-out" }
+    );
+  }
+
+  function step(delta) {
+    const n = curIdx + delta;
+    if (n < 0 || n >= ITEMS.length) return;
+    sheet.classList.add("swapping");
+    setTimeout(() => { fill(n); sheet.classList.remove("swapping"); }, 160);
+  }
+  sPrev.addEventListener("click", () => step(-1));
+  sNext.addEventListener("click", () => step(1));
+
+  function openSheet(idx, from) {
+    fill(idx);
     lastFocus = document.activeElement;
+    sheet.style.transform = "";
     document.body.classList.add("open");
     sheet.setAttribute("aria-hidden", "false");
-    sheet.querySelector(".body").scrollTop = 0;
-    if (!document.body.classList.contains("guiding")) document.getElementById("sheet-close").focus();
+    lockScroll(true);
+    grow(from);
+    if (!document.body.classList.contains("guiding")) sheet.focus({ preventScroll: true });
   }
   function closeSheet() {
     document.body.classList.remove("open");
     sheet.setAttribute("aria-hidden", "true");
+    sheet.style.transform = "";
+    lockScroll(false);
     if (lastFocus && lastFocus.focus && !document.body.classList.contains("guiding")) lastFocus.focus();
   }
+  /* ---------- feuille mobile : verrou de défilement, glisser pour fermer ---------- */
+  const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
+  let locked = false;
+  function lockScroll(on) {
+    on = on && isPhone();
+    if (on === locked) return;
+    locked = on;
+    document.documentElement.style.overflow = on ? "hidden" : "";
+  }
+  const grab = document.getElementById("sheet-grab");
+  let dragY = null;
+  grab.addEventListener("pointerdown", e => {
+    if (!isPhone()) return;
+    dragY = e.clientY;
+    document.body.classList.add("dragging");
+    try { grab.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  grab.addEventListener("pointermove", e => {
+    if (dragY === null) return;
+    sheet.style.transform = "translateY(" + Math.max(0, e.clientY - dragY) + "px)";
+  });
+  function endDrag(e) {
+    if (dragY === null) return;
+    const dy = Math.max(0, e.clientY - dragY);
+    dragY = null;
+    document.body.classList.remove("dragging");
+    sheet.style.transform = "";
+    if (dy > 80) closeSheet();
+  }
+  grab.addEventListener("pointerup", endDrag);
+  grab.addEventListener("pointercancel", endDrag);
+
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
   veil.addEventListener("click", closeSheet);
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("open")) closeSheet(); });
+  document.addEventListener("keydown", e => {
+    if (!document.body.classList.contains("open")) return;
+    if (e.key === "Escape") return closeSheet();
+    if (document.body.classList.contains("guiding")) return;
+    if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
+  });
 
-  /* ---------- filter ---------- */
-  const fbtns = document.querySelectorAll(".filter button");
+  /* ---------- filtre : deux dimensions, agents ou piliers ---------- */
+  const bar = document.querySelector(".filter");
+  const setAgent = document.getElementById("set-agent"), setPilier = document.getElementById("set-pilier");
+  const abtns = setAgent.querySelectorAll("button"), pbtns = setPilier.querySelectorAll("button");
+  function resetCards() {
+    document.body.classList.remove("filtering", "by-pilier");
+    document.querySelectorAll(".card").forEach(c => c.classList.remove("on"));
+  }
   function applyFilter(a) {
-    const cards = document.querySelectorAll(".card");
-    fbtns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.agent === a)));
-    if (a === "all") { document.body.classList.remove("filtering"); cards.forEach(c => c.classList.remove("on")); return; }
+    abtns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.agent === a)));
+    pbtns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pilier === "all")));
+    resetCards();
+    if (a === "all") return;
     document.body.classList.add("filtering");
     document.body.style.setProperty("--hl", AGENTS[a].c);
-    cards.forEach(c => c.classList.toggle("on", c.dataset.agents.split(" ").indexOf(a) >= 0));
+    document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", c.dataset.agents.split(" ").indexOf(a) >= 0));
   }
-  fbtns.forEach(b => b.addEventListener("click", () => applyFilter(b.dataset.agent)));
+  function applyPilier(p) {
+    pbtns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pilier === p)));
+    abtns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.agent === "all")));
+    resetCards();
+    if (p === "all") return;
+    document.body.classList.add("by-pilier");
+    document.querySelectorAll(".card").forEach(c => c.classList.toggle("on", c.dataset.pilier === p));
+  }
+  abtns.forEach(b => b.addEventListener("click", () => applyFilter(b.dataset.agent)));
+  pbtns.forEach(b => b.addEventListener("click", () => applyPilier(b.dataset.pilier)));
+
+  const dimLabel = document.getElementById("dim-label");
+  let dim = "agent";
+  document.getElementById("dim-switch").addEventListener("click", () => {
+    dim = dim === "agent" ? "pilier" : "agent";
+    dimLabel.textContent = dim === "agent" ? "Agents" : "Piliers";
+    setAgent.hidden = dim !== "agent";
+    setPilier.hidden = dim !== "pilier";
+    if (dim === "agent") applyFilter("all"); else applyPilier("all");
+    bar.scrollLeft = 0;
+  });
 
   /* ---------- reveal ---------- */
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1015,8 +1336,8 @@
     { title: "Une descente en cinq paliers", body: "Cette page se lit de haut en bas comme une plongée. Plus vous descendez, plus les éléments de ma culture sont difficiles à observer de l'extérieur. Le guide dure moins d'une minute." },
     { title: "Votre profondeur", body: "En bas à gauche : la profondeur actuelle, la lumière qui reste et la pression. Les repères théoriques de la page suivent la même échelle.", sel: ".hud" },
     { title: "Les cartes", body: "Chaque carte porte un élément de ma culture, les pastilles de couleur indiquant qui me l'a transmis. En bas de la carte, la phase de socialisation et la trajectoire : continuité, rupture ou accommodation.", sel: "#pratiques .card", scroll: true },
-    { title: "Le détail", body: "Un clic ouvre ce panneau : deux anecdotes concrètes et la lecture théorique correspondante. C'est là que se trouve le fond de l'analyse.", sel: ".sheet", open: 0, delay: 620 },
-    { title: "Le filtre", body: "Sélectionnez un agent pour n'allumer que ce qu'il a déposé en moi. Essayez l'entreprise : sept cartes sur vingt-sept s'allument.", sel: ".filter", close: true, demo: "travail" },
+    { title: "Le détail", body: "Un clic ouvre ce panneau : deux souvenirs précis, et une dernière ligne qui dit où l'élément se range dans le modèle.", sel: ".sheet", open: 0, delay: 620 },
+    { title: "Le filtre", body: "Sélectionnez quelqu'un pour n'allumer que ce qu'il a déposé en moi. Essayez l'entreprise : sept cartes s'allument, et quatre d'entre elles existaient déjà avant que j'y mette les pieds.", sel: ".filter", close: true, demo: "travail" },
     { title: "Les couches", body: "À droite, la liste des couches avec leur profondeur. Vous pouvez y sauter directement à tout moment.", sel: ".rail" },
   ];
   const ring = document.getElementById("ring"), guide = document.getElementById("guide");
@@ -1104,14 +1425,22 @@
 
   /* ================= WORLD ================= */
   const cv = document.getElementById("sea"), ctx = cv.getContext("2d");
-  let W = 0, H = 0, DPR = 1, PX = 1;
-  function resize() {
-    DPR = Math.min(1, window.devicePixelRatio || 1);
-    W = cv.width = Math.floor(window.innerWidth * DPR);
-    H = cv.height = Math.floor(window.innerHeight * DPR);
+  const MOB = window.matchMedia("(max-width: 760px), (hover: none)").matches;
+  let W = 0, H = 0, DPR = 1, PX = 1, lastVW = 0, lastVH = 0;
+  function resize(force) {
+    const vw = cv.clientWidth || window.innerWidth, vh = cv.clientHeight || window.innerHeight;
+    /* sur mobile la barre d'URL qui se replie change la hauteur à chaque défilement :
+       réallouer le canvas à chaque fois coûte cher et fait clignoter la scène. */
+    if (!force && vw === lastVW && (vh === lastVH || (MOB && Math.abs(vh - lastVH) < 150))) return;
+    lastVW = vw; lastVH = vh;
+    DPR = Math.min(MOB ? 1 : 1.5, window.devicePixelRatio || 1);
+    W = cv.width = Math.floor(vw * DPR);
+    H = cv.height = Math.floor(vh * DPR);
     PX = H / 64;
   }
-  resize(); window.addEventListener("resize", resize);
+  resize(true);
+  window.addEventListener("resize", () => resize(false));
+  window.addEventListener("orientationchange", () => setTimeout(() => resize(true), 250));
 
   function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
@@ -1157,8 +1486,8 @@
                    sh: Math.min(1, Math.max(0, .14 + .86 * c + (R() - .5) * .22)) });
     }
   }
-  const CRACKS = []; for (let i = 0; i < 46; i++) { const d = -40 + R() * 670; const w = edge(RIGHT, d) - edge(LEFT, d); CRACKS.push({ d, x: edge(LEFT, d) + (.08 + R() * .84) * w, len: .05 + R() * .17, ang: -.7 + R() * 1.4, bend: (R() - .5) * .5, a: .1 + R() * .16, w: .8 + R() * 1.4 }); }
-  const SPARKS = []; for (let i = 0; i < 26; i++) { const d = -45 + R() * 44; const w = edge(RIGHT, d) - edge(LEFT, d); SPARKS.push({ d, x: edge(LEFT, d) + (.1 + R() * .8) * w, r: 2 + R() * 4, a: .25 + R() * .5, ph: R() * 6.28, sp: .8 + R() * 2.2 }); }
+  const CRACKS = []; for (let i = 0, N = MOB ? 24 : 46; i < N; i++) { const d = -40 + R() * 670; const w = edge(RIGHT, d) - edge(LEFT, d); CRACKS.push({ d, x: edge(LEFT, d) + (.08 + R() * .84) * w, len: .05 + R() * .17, ang: -.7 + R() * 1.4, bend: (R() - .5) * .5, a: .1 + R() * .16, w: .8 + R() * 1.4 }); }
+  const SPARKS = []; for (let i = 0, N = MOB ? 14 : 26; i < N; i++) { const d = -45 + R() * 44; const w = edge(RIGHT, d) - edge(LEFT, d); SPARKS.push({ d, x: edge(LEFT, d) + (.1 + R() * .8) * w, r: 2 + R() * 4, a: .25 + R() * .5, ph: R() * 6.28, sp: .8 + R() * 2.2 }); }
 
   const SCHOOLS = [
     { d: 12, n: 18, sp: .06, dir: 1, size: .9, spread: 6, x0: .45 },
@@ -1169,13 +1498,13 @@
     { d: 150, n: 40, sp: .028, dir: -1, size: .7, spread: 14, x0: .1 },
     { d: 214, n: 24, sp: .022, dir: -1, size: 1.05, spread: 11, x0: .3 },
     { d: 262, n: 16, sp: .018, dir: 1, size: 1.3, spread: 8, x0: .6 },
-  ].map(s => { const r = rng(Math.floor(s.d)); return Object.assign({}, s, { fish: Array.from({ length: s.n }, () => ({ ox: (r() - .5) * .28, od: (r() - .5) * s.spread, ph: r() * 6.28, sz: .7 + r() * .6 })) }); });
-  const JELLY = Array.from({ length: 9 }, (_, i) => { const r = rng(100 + i); return { x: .15 + r() * .8, d: 170 + r() * 90, rad: 14 + r() * 26, ph: r() * 6.28, sp: .6 + r() * .8, hue: r() }; });
-  const BIO = Array.from({ length: 42 }, (_, i) => { const r = rng(300 + i); return { x: r(), d: 430 + r() * 200, ph: r() * 6.28, sp: .4 + r() * 1.2, sz: 1 + r() * 2.2, c: r() }; });
-  const SNOW = Array.from({ length: 160 }, (_, i) => { const r = rng(500 + i); return { x: r(), y: r(), r: .6 + r() * 2, s: .00008 + r() * .00022, w: r() * 6.28 }; });
+  ].map(s => { const r = rng(Math.floor(s.d)); return Object.assign({}, s, { fish: Array.from({ length: MOB ? Math.round(s.n * .5) : s.n }, () => ({ ox: (r() - .5) * .28, od: (r() - .5) * s.spread, ph: r() * 6.28, sz: .7 + r() * .6 })) }); });
+  const JELLY = Array.from({ length: MOB ? 5 : 9 }, (_, i) => { const r = rng(100 + i); return { x: .15 + r() * .8, d: 170 + r() * 90, rad: 14 + r() * 26, ph: r() * 6.28, sp: .6 + r() * .8, hue: r() }; });
+  const BIO = Array.from({ length: MOB ? 20 : 42 }, (_, i) => { const r = rng(300 + i); return { x: r(), d: 430 + r() * 200, ph: r() * 6.28, sp: .4 + r() * 1.2, sz: 1 + r() * 2.2, c: r() }; });
+  const SNOW = Array.from({ length: MOB ? 70 : 160 }, (_, i) => { const r = rng(500 + i); return { x: r(), y: r(), r: .6 + r() * 2, s: .00008 + r() * .00022, w: r() * 6.28 }; });
   const GULLS = [{ x: .18, y: .30, sp: .055, w: 2.6, ph: 0 }, { x: .52, y: .44, sp: .042, w: 1.9, ph: 2.1 }, { x: .82, y: .24, sp: .05, w: 2.2, ph: 4.3 }];
   const RAYS = [{ d: 176, sp: .016, dir: -1, x0: .8, L: .17 }, { d: 356, sp: .012, dir: 1, x0: .2, L: .22 }];
-  const KELP = Array.from({ length: 14 }, (_, i) => { const r = rng(900 + i); return { x: r(), h: .4 + r() * .7, w: 3 + r() * 5, ph: r() * 6.28, sp: .5 + r() * .7 }; });
+  const KELP = Array.from({ length: MOB ? 8 : 14 }, (_, i) => { const r = rng(900 + i); return { x: r(), h: .4 + r() * .7, w: 3 + r() * 5, ph: r() * 6.28, sp: .5 + r() * .7 }; });
   let BUB = [], wasUnder = false;
 
   const T0 = performance.now();
@@ -1228,8 +1557,8 @@
       ctx.fillStyle = g; ctx.fillRect(0, y0, W, H - y0);
       if (light > .02) {
         ctx.save(); ctx.globalCompositeOperation = "lighter";
-        for (let i = 0; i < 7; i++) {
-          const x = W * (.1 + i * .14) + Math.sin(t * .25 + i) * W * .03;
+        for (let i = 0, N = MOB ? 4 : 7, st = .98 / N; i < N; i++) {
+          const x = W * (.1 + i * st) + Math.sin(t * .25 + i) * W * .03;
           const a = .05 * light * (.6 + .4 * Math.sin(t * .7 + i * 1.3));
           const g2 = ctx.createLinearGradient(0, y0, 0, y0 + H * .9);
           g2.addColorStop(0, "rgba(168,214,255," + a + ")"); g2.addColorStop(1, "rgba(168,214,255,0)");
@@ -1245,7 +1574,7 @@
     for (let i = LEFT.length - 1; i >= 0; i--) ctx.lineTo(sx(LEFT[i][0]), sy(LEFT[i][1]));
     ctx.closePath();
     ctx.lineJoin = "round";
-    for (let i = 4; i >= 1; i--) { ctx.lineWidth = i * 16 * DPR; ctx.strokeStyle = "rgba(118,194,255," + ((.06 * light + .012) / i) + ")"; ctx.stroke(); }
+    for (let i = MOB ? 2 : 4; i >= 1; i--) { ctx.lineWidth = i * 16 * DPR; ctx.strokeStyle = "rgba(118,194,255," + ((.06 * light + .012) / i) + ")"; ctx.stroke(); }
     const ig = ctx.createLinearGradient(0, sy(-46), 0, sy(700));
     ig.addColorStop(0,    "rgba(255,255,255,.98)");
     ig.addColorStop(.050, "rgba(238,247,255,.97)");
